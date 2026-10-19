@@ -140,13 +140,13 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://docvault-production-27ee.up.railway.app",
+    "docvault-production-496e.up.railway.app",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://docvault-production-27ee.up.railway.app",
+    "docvault-production-5214.up.railway.app",
 ]
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
