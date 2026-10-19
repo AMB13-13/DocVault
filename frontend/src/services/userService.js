@@ -7,8 +7,8 @@ export const userService = {
     return response.data;
   },
 
+  // Admin panel: an administrator creates an account.
   async create(data) {
-    // Convert the selected role to the value expected by Django.
     const selectedRole = String(data.role || "")
       .trim()
       .toLowerCase();
@@ -27,7 +27,20 @@ export const userService = {
       password: data.password,
       first_name: data.first_name || "",
       last_name: data.last_name || "",
-      role: role,
+      role,
+    });
+
+    return response.data;
+  },
+
+  // Public registration: Django always creates a normal user.
+  async register(data) {
+    const response = await api.post("/register/", {
+      username: data.username,
+      email: data.email,
+      password: data.password,
+      first_name: data.first_name || "",
+      last_name: data.last_name || "",
     });
 
     return response.data;
@@ -38,7 +51,6 @@ export const userService = {
       `/users/${id}/rename/`,
       { name }
     );
-
     return response.data;
   },
 
@@ -47,7 +59,6 @@ export const userService = {
       `/users/${id}/status/`,
       { status }
     );
-
     return response.data;
   },
 

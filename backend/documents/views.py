@@ -186,37 +186,75 @@ def users_list(request):
     return Response(UserSerializer(User.objects.order_by("-id"), many=True).data)
 
 
-@api_view(["POST"])
-def users_create(request):
-    if request.user.role != "admin":
-        return Response({"detail": "Accès réservé aux administrateurs."}, status=403)
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated, IsAdminUserRole])
+def users_create(request):
     username = str(request.data.get("username", "")).strip()
     email = str(request.data.get("email", "")).strip().lower()
     password = request.data.get("password", "")
-    role = request.data.get("role", "user")
     first_name = str(request.data.get("first_name", "")).strip()
     last_name = str(request.data.get("last_name", "")).strip()
-    if role not in {"admin", "user"}:
-        role = "user"
-    if not username or not email or not password:
-        return Response({"detail": "username, email et password sont obligatoires."}, status=400)
-    if User.objects.filter(username=username).exists():
-        return Response({"detail": "Ce username existe déjà."}, status=400)
-    if User.objects.filter(email__iexact=email).exists():
-        return Response({"detail": "Cet email existe déjà."}, status=400)
 
-    user = User.objects.create(
+    role = str(request.data.get("role", "user")).strip().lower()
+
+    if role in {"admin", "administrateur", "administrator"}:
+        role = "admin"
+    elif role in {"user", "utilisateur"}:
+        role = "user"
+    else:
+        return Response(
+            {"detail": "Rôle invalide."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if not username or not email or not password:
+        return Response(
+            {"detail": "Nom d'utilisateur, email et mot de passe obligatoires."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if len(password) < 8:
+        return Response(
+            {"detail": "Le mot de passe doit contenir au moins 8 caractères."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if User.objects.filter(username__iexact=username).exists():
+        return Response(
+            {"detail": "Ce nom d'utilisateur existe déjà."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if User.objects.filter(email__iexact=email).exists():
+        return Response(
+            {"detail": "Cet email existe déjà."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user = User.objects.create_user(
         username=username,
         email=email,
-        password=make_password(password),
+        password=password,
         first_name=first_name,
         last_name=last_name,
-        role=role,
-        is_staff=(role == "admin"),
     )
-    PersonalDrive.objects.create(user=user, nom=f"Personal Drive {first_name or username}")
-    return Response(UserSerializer(user).data, status=201)
+
+    user.role = role
+    user.is_staff = role == "admin"
+    user.save(update_fields=["role", "is_staff"])
+
+    PersonalDrive.objects.get_or_create(
+        user=user,
+        defaults={
+            "nom": f"Personal Drive {first_name or username}"
+        },
+    )
+
+    return Response(
+        UserSerializer(user).data,
+        status=status.HTTP_201_CREATED,
+    )
 
 
 @api_view(["PATCH", "DELETE"])
@@ -429,7 +467,7 @@ def storage_info(request):
     })
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def users_create(request):
+def register_view(request):
     username = request.data.get("username", "").strip()
     email = request.data.get("email", "").strip()
     password = request.data.get("password", "")

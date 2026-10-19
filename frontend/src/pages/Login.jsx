@@ -150,7 +150,6 @@ export default function Login() {
         password: registerData.password,
         first_name: firstName,
         last_name: lastName,
-        role: "Utilisateur",
       });
 
       // Registration succeeded
