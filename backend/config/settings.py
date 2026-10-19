@@ -140,7 +140,7 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://docvault-production-496e.up.railway.app",
+    "https://docvault-production-5214.up.railway.app",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
