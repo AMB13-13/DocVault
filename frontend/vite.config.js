@@ -6,7 +6,7 @@ export default defineConfig({
 
   preview: {
     allowedHosts: [
-      "docvault-production-27ee.up.railway.app",
+      "docvault-production-5214.up.railway.app",
     ],
   },
 });
